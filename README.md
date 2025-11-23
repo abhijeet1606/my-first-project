@@ -24,4 +24,4 @@ The program allows you to:
 gcc main.c -o student_manager
 
 # run
-./student_manager# my-first-project
+student_manager.exe# my-first-project
