@@ -1,0 +1,213 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_STUDENTS 100
+#define MAX_SUBJECTS 5
+
+typedef struct {
+    int id;
+    char name[50];
+    int numSubjects;
+    float marks[MAX_SUBJECTS];
+    float average;
+    char grade;
+} Student;
+
+Student students[MAX_STUDENTS];
+int studentCount = 0;
+
+// Function declarations
+void addStudent();
+void calculateAverageAndGrade(Student *s);
+void listStudents();
+void searchStudentById();
+void pressEnterToContinue();
+
+int main() {
+    int choice;
+
+    do {
+        printf("\n====== Student Grade Manager ======\n");
+        printf("1. Add new student\n");
+        printf("2. List all students\n");
+        printf("3. Search student by ID\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                addStudent();
+                break;
+            case 2:
+                listStudents();
+                break;
+            case 3:
+                searchStudentById();
+                break;
+            case 4:
+                printf("Exiting program. Goodbye!\n");
+                break;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+
+    } while (choice != 4);
+
+    return 0;
+}
+
+void addStudent() {
+    if (studentCount >= MAX_STUDENTS) {
+        printf("Cannot add more students. Maximum limit reached.\n");
+        return;
+    }
+
+    Student s;
+    int i;
+
+    printf("\n--- Add New Student ---\n");
+    printf("Enter student ID (integer): ");
+    scanf("%d", &s.id);
+
+    // Clear input buffer before reading string
+    getchar();
+    printf("Enter student name: ");
+    fgets(s.name, sizeof(s.name), stdin);
+    // Remove trailing newline if present
+    s.name[strcspn(s.name, "\n")] = '\0';
+
+    printf("Enter number of subjects (1 to %d): ", MAX_SUBJECTS);
+    scanf("%d", &s.numSubjects);
+
+    if (s.numSubjects < 1 || s.numSubjects > MAX_SUBJECTS) {
+        printf("Invalid number of subjects. Setting to 3 by default.\n");
+        s.numSubjects = 3;
+    }
+
+    for (i = 0; i < s.numSubjects; i++) {
+        printf("Enter marks for subject %d (0 to 100): ", i + 1);
+        scanf("%f", &s.marks[i]);
+
+        if (s.marks[i] < 0 || s.marks[i] > 100) {
+            printf("Invalid marks. Setting to 0.\n");
+            s.marks[i] = 0;
+        }
+    }
+
+    calculateAverageAndGrade(&s);
+
+    students[studentCount] = s;
+    studentCount++;
+
+    printf("Student added successfully!\n");
+    pressEnterToContinue();
+}
+
+void calculateAverageAndGrade(Student *s) {
+    float sum = 0.0f;
+    int i;
+
+    for (i = 0; i < s->numSubjects; i++) {
+        sum += s->marks[i];
+    }
+
+    s->average = sum / s->numSubjects;
+
+    if (s->average >= 90) {
+        s->grade = 'A';
+    } else if (s->average >= 75) {
+        s->grade = 'B';
+    } else if (s->average >= 60) {
+        s->grade = 'C';
+    } else if (s->average >= 50) {
+        s->grade = 'D';
+    } else {
+        s->grade = 'F';
+    }
+}
+
+void listStudents() {
+    int i, j;
+
+    if (studentCount == 0) {
+        printf("\nNo students to display.\n");
+        pressEnterToContinue();
+        return;
+    }
+
+    printf("\n--- Student List ---\n");
+    printf("ID\tName\t\tAverage\tGrade\n");
+    printf("----------------------------------------\n");
+
+    for (i = 0; i < studentCount; i++) {
+        printf("%d\t%-15s\t%.2f\t%c\n",
+               students[i].id,
+               students[i].name,
+               students[i].average,
+               students[i].grade);
+    }
+
+    printf("----------------------------------------\n");
+
+    // Optional: show details of each student's marks
+    printf("\nDo you want to see marks of each student? (1 = Yes / 0 = No): ");
+    int showMarks;
+    scanf("%d", &showMarks);
+
+    if (showMarks == 1) {
+        for (i = 0; i < studentCount; i++) {
+            printf("\nID: %d, Name: %s\n", students[i].id, students[i].name);
+            printf("Marks: ");
+            for (j = 0; j < students[i].numSubjects; j++) {
+                printf("%.2f ", students[i].marks[j]);
+            }
+            printf("\nAverage: %.2f, Grade: %c\n", students[i].average, students[i].grade);
+        }
+    }
+
+    pressEnterToContinue();
+}
+
+void searchStudentById() {
+    int id, i;
+    int found = 0;
+
+    if (studentCount == 0) {
+        printf("\nNo students available to search.\n");
+        pressEnterToContinue();
+        return;
+    }
+
+    printf("\nEnter student ID to search: ");
+    scanf("%d", &id);
+
+    for (i = 0; i < studentCount; i++) {
+        if (students[i].id == id) {
+            found = 1;
+            printf("\n--- Student Found ---\n");
+            printf("ID      : %d\n", students[i].id);
+            printf("Name    : %s\n", students[i].name);
+            printf("Subjects: %d\n", students[i].numSubjects);
+            printf("Marks   : ");
+            for (int j = 0; j < students[i].numSubjects; j++) {
+                printf("%.2f ", students[i].marks[j]);
+            }
+            printf("\nAverage : %.2f\n", students[i].average);
+            printf("Grade   : %c\n", students[i].grade);
+            break;
+        }
+    }
+
+    if (!found) {
+        printf("Student with ID %d not found.\n", id);
+    }
+
+    pressEnterToContinue();
+}
+
+void pressEnterToContinue() {
+    printf("\nPress ENTER to continue...");
+    getchar(); // consume leftover '\n' if any
+    getchar(); // wait for user to press enter
+}
