@@ -26,5 +26,5 @@ The program supports any number of students and any number of subjects, making i
 - Sorted output (highest scorer first)
 
 ### ✅ Clean, Table-Style Output
-Example:
+Example:![image alt](https://github.com/abhijeet1606/my-first-project/blob/main/output.png?raw=true)
 
