@@ -1,27 +1,30 @@
-# Student Grade Manager (C Project)
+# Student Result Management System with Automatic Ranking
 
-A simple *console-based Student Grade Manager* written in C for first semester programming.
+This project is a simple C-based **Student Result Management System** that automatically calculates each student's **total marks**, **percentage**, and **rank** based on their performance across multiple subjects.
 
-The program allows you to:
-- Add new students with ID, name, and marks
-- Automatically calculate average and grade
-- List all students in a table
-- Search a student by ID
+The program supports any number of students and any number of subjects, making it flexible for classroom use or academic mini-projects.
 
-## Concepts Used
+---
 
-- Variables and data types  
-- Arrays  
-- Structures (struct)  
-- Functions and parameter passing  
-- Loops and conditional statements  
-- Menu-driven programming using switch
+## ✨ Features
 
-## How to Compile and Run
+### ✅ Automatic Ranking System
+- Students are ranked **in descending order of total marks**.
+- Includes **tie handling** (students with equal totals get the same rank).
+- Uses *standard competition ranking*:  
+  Example → `95, 95, 90` → ranks **1, 1, 3**
 
-```bash
-# compile
-gcc main.c -o student_manager
+### ✅ Flexible Input
+- Enter number of students  
+- Enter number of subjects  
+- Enter name and marks of each student  
 
-# run
-student_manager.exe# my-first-project
+### ✅ Automatic Calculations
+- Total marks  
+- Percentage  
+- Rank assignment  
+- Sorted output (highest scorer first)
+
+### ✅ Clean, Table-Style Output
+Example:
+
