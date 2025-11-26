@@ -1,0 +1,114 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_NAME_LEN 100
+
+typedef struct {
+    int id;
+    char name[MAX_NAME_LEN];
+    int *marks;      // pointer to marks array (size = subjects)
+    int total;
+    double percent;
+    int rank;
+} Student;
+
+/* comparator for qsort: sort by total descending, then by id ascending */
+int cmp_desc_total(const void *a, const void *b) {
+    const Student *sa = (const Student*)a;
+    const Student *sb = (const Student*)b;
+    if (sa->total != sb->total) return (sb->total - sa->total); // descending
+    return (sa->id - sb->id); // stable tiebreaker
+}
+
+/* compute totals & percentages */
+void compute_totals(Student *students, int n, int subjects, int max_mark_per_subject) {
+    for (int i = 0; i < n; ++i) {
+        int sum = 0;
+        for (int j = 0; j < subjects; ++j) sum += students[i].marks[j];
+        students[i].total = sum;
+        students[i].percent = (subjects > 0) ? (100.0 * sum) / (subjects * max_mark_per_subject) : 0.0;
+    }
+}
+
+/* assign ranks using standard competition ranking:
+   if totals: 95,95,90 -> ranks 1,1,3 */
+void assign_ranks(Student *students, int n) {
+    if (n == 0) return;
+    students[0].rank = 1;
+    for (int i = 1; i < n; ++i) {
+        if (students[i].total == students[i-1].total) {
+            students[i].rank = students[i-1].rank;
+        } else {
+            students[i].rank = i + 1; // competition rank (1-based)
+        }
+    }
+}
+
+/* free allocated marks arrays */
+void free_students(Student *students, int n) {
+    for (int i = 0; i < n; ++i) free(students[i].marks);
+    free(students);
+}
+
+/* example usage */
+int main(void) {
+    int n, subjects;
+    int max_mark_per_subject = 100; // change if different
+    printf("Enter number of students: ");
+    if (scanf("%d", &n) != 1 || n <= 0) {
+        printf("Invalid student count.\n");
+        return 1;
+    }
+    printf("Enter number of subjects: ");
+    if (scanf("%d", &subjects) != 1 || subjects <= 0) {
+        printf("Invalid subject count.\n");
+        return 1;
+    }
+
+    // allocate student array
+    Student *students = malloc(sizeof(Student) * n);
+    if (!students) { perror("malloc"); return 1; }
+
+    for (int i = 0; i < n; ++i) {
+        students[i].id = i + 1;
+        students[i].marks = malloc(sizeof(int) * subjects);
+        if (!students[i].marks) { perror("malloc"); return 1; }
+        printf("\nStudent %d name: ", i+1);
+        // read name (consume newline first)
+        getchar();
+        if (!fgets(students[i].name, MAX_NAME_LEN, stdin)) strcpy(students[i].name, "Unknown\n");
+        // remove trailing newline
+        size_t L = strlen(students[i].name);
+        if (L > 0 && students[i].name[L-1] == '\n') students[i].name[L-1] = '\0';
+
+        printf("Enter %d marks for %s (space-separated): ", subjects, students[i].name);
+        for (int j = 0; j < subjects; ++j) {
+            if (scanf("%d", &students[i].marks[j]) != 1) students[i].marks[j] = 0;
+        }
+    }
+
+    // compute totals & percentages
+    compute_totals(students, n, subjects, max_mark_per_subject);
+
+    // sort students by total descending
+    qsort(students, n, sizeof(Student), cmp_desc_total);
+
+    // assign ranks (with ties handled)
+    assign_ranks(students, n);
+
+    // print ranked output
+    printf("\nRank  ID  Name                     Total  Percent\n");
+    printf("-------------------------------------------------\n");
+    for (int i = 0; i < n; ++i) {
+        printf("%4d  %3d  %-22s  %5d  %7.2f%%\n",
+               students[i].rank,
+               students[i].id,
+               students[i].name,
+               students[i].total,
+               students[i].percent);
+    }
+
+    free_students(students, n);
+    return 0;
+}
